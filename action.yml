@@ -1,0 +1,83 @@
+name: zpm-install
+author: Omae Tadashi
+description: Install a zsh plugin manager on the Action
+
+branding:
+  icon: package
+  color: gray-dark
+
+
+inputs:
+  # Details: https://github.com/zdharma/zinit#customizing-paths
+  zinit_home:
+    description: '`ZINIT[HOME_DIR]`; `$ZDOTDIR/.zinit`; Home of zinit all working dirs'
+    required: false
+    default: ''
+  zinit_bin:
+    description: '`ZINIT[HOME_DIR]`; Where Zinit code resides'
+    required: false
+    default: ''
+  zinit_plugins:
+    description: '`ZINIT[PLUGINS_DIR]`; Home of all plugins; This overrides single dir'
+    required: false
+    default: ''
+  zinit_completions:
+    description: '`ZINIT[COMPLETIONS_DIR]`; Home of all completions'
+    required: false
+    default: ''
+  zinit_snippets:
+    description: '`ZINIT[SNIPPETS_DIR]`; Home of all snippets'
+    required: false
+    default: ''
+  zpfx:
+    description: '`$ZPFX`; Home of any software directory'
+    required: false
+    default: ''
+
+runs:
+  using: composite
+  steps:
+    - id: install
+      run: |
+        export INPUT_ZINIT_HOME="${{ inputs.zinit_home }}"
+        export INPUT_ZINIT_BIN="${{ inputs.zinit_bin }}"
+        export INPUT_ZINIT_PLUGINS="${{ inputs.zinit_plugins }}"
+        export INPUT_ZINIT_COMPLETIONS="${{ inputs.zinit_completions }}"
+        export INPUT_ZINIT_SNIPPETS="${{ inputs.zinit_snippets }}"
+        export INPUT_ZPFX="${{ inputs.zpfx }}"
+
+        pathvar_init_script='typeset -A ZINIT'
+        if [[ ! -z INPUT_ZINIT_HOME ]]; then
+          pathvar_init_script+="\nexport ZINIT[HOME_DIR]=$INPUT_ZINIT_HOME"
+        fi
+        if [[ ! -z INPUT_ZINIT_BIN ]]; then
+          pathvar_init_script+="\nexport ZINIT[BIN_DIR]=$INPUT_ZINIT_BIN"
+        fi
+        if [[ ! -z INPUT_ZINIT_PLUGINS ]]; then
+          pathvar_init_script+="\nexport ZINIT[PLUGINS_DIR]=$INPUT_ZINIT_PLUGINS"
+        fi
+        if [[ ! -z INPUT_ZINIT_COMPLETIONS ]]; then
+          pathvar_init_script+="\nexport ZINIT[COMPLETIONS_DIR]=$INPUT_ZINIT_COMPLETIONS"
+        fi
+        if [[ ! -z INPUT_ZINIT_SNIPPETS ]]; then
+          pathvar_init_script+="\nexport ZINIT[SNIPPETS_DIR]=$INPUT_ZINIT_SNIPPETS"
+        fi
+        if [[ ! -z INPUT_ZPFX ]]; then
+          pathvar_init_script+="\nexport ZPFX=$INPUT_ZPFX"
+        fi
+
+
+        export ZINIT_HOME="${INPUT_ZINIT_HOME:-${ZDOTDIR:-$HOME}/.zinit}"
+
+        installer='https://raw.githubusercontent.com/zdharma/zinit/master/doc/install.sh'
+        echo y | sh -c "$(curl -fsSL $installer)"
+
+
+        if [[ $(echo "$pathvar_init_script" | wc -l) > 1 ]]; then
+          zshrc_path="${ZDOTDIR:-$HOME}/.zshrc"
+          oldrc=$(cat "$zshrc_path")
+          cat <(echo "${pathvar_init_script}\n") <(echo "$oldrc") > "$zshrc_path"
+        fi
+
+      shell: zsh -edf --pipefail {0}
+

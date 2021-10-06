@@ -1,0 +1,45 @@
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'action.yml'
+
+jobs:
+  test_run:
+    name: Test for action.yml
+    runs-on: ubuntu-latest
+    container: zshusers/zsh:latest
+    defaults:
+      run:
+        shell: zsh -edf --pipefail {0}
+
+    steps:
+      - name: Packages update and install
+        run: |
+          apt update && apt upgrade -y
+          apt install -y git subversion curl wget
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install zinit
+        id: install_zinit
+        uses: ./
+        with:
+          zinit_home: "/opt/zinit"
+
+      - name: Perform zinit
+        run: |
+          source "${ZDOTDIR:-$HOME}/.zshrc"
+
+          echo $ZINIT[HOME_DIR]
+          echo $ZINIT[BIN_DIR]
+          echo $ZINIT[PLUGINS_DIR]
+          echo $ZINIT[COMPLETIONS_DIR]
+          echo $ZINIT[SNIPPETS_DIR]
+          echo $ZPFX
+
+          zinit zstatus
+
+        # When use `-e/--errexit` opt, some zinit commands will fail
+        shell: zsh -df --pipefail {0}
