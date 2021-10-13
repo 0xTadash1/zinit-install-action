@@ -28,7 +28,7 @@ inputs:
     required: false
     default: ''
   zinit_bin:
-    description: '`ZINIT[HOME_DIR]`; Where Zinit code resides'
+    description: '`ZINIT[BIN_DIR]`; Where Zinit code resides'
     required: false
     default: ''
   zinit_plugins:
