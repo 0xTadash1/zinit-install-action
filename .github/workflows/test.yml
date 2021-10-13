@@ -26,6 +26,7 @@ jobs:
         id: install_zinit
         uses: ./
         with:
+          zpm_type: zinit
           zinit_home: "/opt/zinit"
 
       - name: Perform zinit
