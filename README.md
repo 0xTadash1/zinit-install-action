@@ -4,6 +4,7 @@
 
 Install a zsh plugin manager on your Action
 
+- [antibody](https://github.com/getantibody/antibody)
 - [zinit](https://github.com/zdharma/zinit)
 
 ## NOTE

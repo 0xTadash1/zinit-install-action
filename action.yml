@@ -8,6 +8,15 @@ branding:
 
 
 inputs:
+  zpm_type:
+    description: 'Type of zsh plugin manager to install: antibody, zgenom, zinit, zplug'
+    required: true
+
+  antibody_home:
+    description: '`ANTIBODY_HOME`; `/usr/local/bin/antibody`; Home of antibody all working dirs'
+    required: false
+    default: ''
+
   # Details: https://github.com/zdharma/zinit#customizing-paths
   zinit_home:
     description: '`ZINIT[HOME_DIR]`; `$ZDOTDIR/.zinit`; Home of zinit all working dirs'
@@ -37,7 +46,20 @@ inputs:
 runs:
   using: composite
   steps:
-    - id: install
+    - id: install_antibody
+      if: ${{ zpm_type == 'antibody' }}
+      run: |
+        export INPUT_ANTIBODY_HOME="${{ inputs.antibody_home }}"
+
+        export ANTIBODY_HOME="${INPUT_ANTIBODY_HOME:-/usr/local/bin/antibody}"
+
+        curl -sfL git.io/antibody | sh -s - -b "$ANTIBODY_HOME"
+
+      shell: zsh -edf --pipefail {0}
+
+
+    - id: install_zinit
+      if: ${{ zpm_type == 'zinit' }}
       run: |
         export INPUT_ZINIT_HOME="${{ inputs.zinit_home }}"
         export INPUT_ZINIT_BIN="${{ inputs.zinit_bin }}"
