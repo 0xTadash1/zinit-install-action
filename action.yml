@@ -48,6 +48,11 @@ inputs:
     required: false
     default: ''
 
+  zplug_home:
+    description: '`ZPLUG_HOME`; `$ZDOTDIR/.zplug`; Home of zplug all working dirs.'
+    required: false
+    default: ''
+
 runs:
   using: composite
   steps:
@@ -120,3 +125,15 @@ runs:
 
       shell: zsh -edf --pipefail {0}
 
+
+    - id: install_zplug
+      if: ${{ zpm_type == 'zplug' }}
+      run: |
+        export INPUT_ZPLUG_HOME="${{ inputs.zplug_home }}"
+
+        export ZPLUG_HOME="${INPUT_ZPLUG_HOME:-${ZDOTDIR:-$HOME}/.zplug}"
+
+        installer='https://raw.githubusercontent.com/zplug/installer/master/installer.zsh'
+        curl -sL --proto-redir -all,https "$installer" | zsh
+
+      shell: zsh -edf --pipefail {0}
